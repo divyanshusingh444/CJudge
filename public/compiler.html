@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></></title>
+
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+    
+    
+    <!-- Codemirror -->
+    <script src="codemirror/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+    <script src="codemirror/mode/javascript/javascript.js"></script>
+    
+    <!-- Codemirror addons -->
+    <script src="codemirror/addon/edit/matchbrackets.js"></script>
+    <script src="codemirror/addon/edit/trailingspace.js"></script>
+    <script src="codemirror/addon/edit/closebrackets.js"></script>
+    <script src="codemirror/addon/fold/foldcode.js"></script>
+    <script src="codemirror/addon/fold/foldgutter.js"></script>
+    <script src="codemirror/addon/fold/brace-fold.js"></script>
+    <script src="codemirror/addon/fold/foldgutter.js"></script>
+    <link rel="stylesheet" href="codemirror/addon/fold/foldgutter.css">
+    <!-- Codemirror Mode -->
+    <script src="codemirror/mode/clike/clike.js"></script>
+    <script src="codemirror/mode/javascript/javascript.js"></script>
+    <script src="codemirror/mode/python/python.js"></script>
+    
+    <!-- Codemirror skins -->
+    <link rel="stylesheet" href="codemirror/theme/dracula.css">
+    <link rel="stylesheet" href="codemirror/theme/monokai.css">
+    <link rel="stylesheet" href="codemirror/theme/icecoder.css">
+    <link rel="stylesheet" href="codemirror/theme/rubyblue.css">
+    <link rel="stylesheet" href="codemirror/theme/ambiance.css">
+    <link rel="stylesheet" href="codemirror/theme/ayu-mirage.css">
+    <link rel="stylesheet" href="codemirror/theme/bespin.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><h2>IDE</h2></a>
+        </div>
+    </nav>
+    
+    <!-- MODAL -->
+    <!-- DOWNLOAD MODAL -->
+    <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Save File as:</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h6>Enter File Name alongwith extension:</h6>
+              <input type="text" name="filename" id="filename">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" onclick="saveFile()" data-bs-dismiss="modal">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Open File:</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Browse File:</h6>
+                <input type="file" name="inputfile" id="inputfile">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <!-- <button type="button" class="btn btn-primary" onclick="uploadFile()" data-bs-dismiss="modal" id="upload">Upload</button> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Indent:</h6>
+                <input type="text" name="userIndent" id="userIndent", placeholder="4">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="updateSettings()" data-bs-dismiss="modal">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- CARD -->
+    <div class="card mx-auto justify-content-center">
+        <div class="card-header ">
+            <div class="options">
+                <div class="btn-group me-2 codeOptions" role="group" aria-label="Second group">
+                    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#downloadModal"><i class="bi bi-cloud-arrow-down-fill"></i></button>
+                    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#uploadModal" onclick="uploadFile()"><i class="bi bi-cloud-upload-fill"></i></button>
+                    <button type="button" class="btn btn-outline-dark"><i class="bi bi-gear-fill" data-bs-toggle="modal" data-bs-target="#settingsModal" ></i></button>
+                    <button type="button" class="btn btn-outline-dark"><i class="bi bi-share-fill"></i></button>
+                    <button type="button" id="run-button" class="btn btn-outline-dark"><i class="bi bi-play-fill"></i></button>
+                  </div>
+                <div class="editorOptions">
+                    <span class="themeOptions">
+                        <select class="form-select form-select-sm w-auto " aria-label=".form-select-sm example" id="themeOptions" onchange="changeTheme()">
+                            <option value="monokai" selected>Monokai</option>
+                            <option value="dracula">Dracula</option>
+                            <option value="icecoder">Icecoder</option>
+                            <option value="rubyblue">Rubyblue</option>
+                            <option value="ambiance">Ambiance</option>
+                            <option value="ayu-mirage">Ayu-Mirage</option>
+                            <option value="bespin">Bespin</option>
+                        </select>
+                    </span>
+                    <span class="modeOptions">
+                        <select class="form-select form-select-sm w-auto" aria-label=".form-select-sm example" id="modeOptions" onchange="changeMode()">
+                            <option value="text/x-c++src"selected>C++</option>
+                            <option value="text/x-csrc">C</option>
+                            <option value="text/x-java">Java</option>
+                            <option value="text/x-python">Python</option>
+                            <option value="text/javascript">Javascript</option>
+                        </select>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        <div class="card-body" >
+            <div class="editor-area" style="height: 35rem">
+                <textarea name="codemirror" id="codemirror" cols="30" rows="50"></textarea>
+
+            </div>
+        </div>
+        <div class="card-footer g">
+            <textarea name="output" id="output" cols="157" rows="10"></textarea>           
+        </div>
+      </div>
+
+      <!-- JS -->
+      <script src="index.js"></script>
+</body>
+</html>
