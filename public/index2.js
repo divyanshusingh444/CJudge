@@ -90,7 +90,7 @@ runButton.addEventListener('click', function() {
   console.log("before fetch")
 
   // Send a POST request to the server with the C++ code
-  fetch('/run', {
+  fetch('/run2', {
     method: 'POST',
     body: JSON.stringify({ code }),
     headers: {

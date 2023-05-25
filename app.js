@@ -2,7 +2,7 @@ const express = require('express')
 const path = require('path')
 const bodyParser = require('body-parser');
 const { spawn } = require('child_process');
-
+const fs = require('fs')
 
 
 const app = express()
@@ -25,7 +25,7 @@ console.log(__dirname)
 app.use(express.static(publicPath));
 
 app.get('/', (req, res) => {
-    res.send('Hello')
+    res.sendFile(__dirname + '/public/landing.html');
 })
 
 app.get('/compiler', (req, res) => {
@@ -36,81 +36,7 @@ app.get('/compiler', (req, res) => {
 
 
 
-// app.post('/run', function(req, res) {
-//     // Get the code from the request body
-//     console.log("here")
-//     var code = req.body.code;
-//     console.log(code)
-  
-//     // Create a child process to execute the code
-//     const child = spawn('g++', ['-x', 'c++', '-o', 'output', '-'], { stdio: 'pipe' });
-  
-//     // Write the code to the child process's stdin
-//     child.stdin.write(code);
-//     child.stdin.end();
-  
-//     // Handle the child process's stdout and stderr
-//     let output = '';
-//     child.stdout.on('data', (data) => {
-//         console.log(`stdout: ${data}`);
-//       output += data.toString();
-//     });
-  
-//     child.stderr.on('data', (chunk) => {
-//       if (chunk) { // Check if chunk is defined
-//         console.error(`stderr: ${data}`);
-//         res.write(chunk.toString());
-//       }
-//     });
-  
-//     // Handle the child process's exit
-//     child.on('exit', (code, signal) => {
-//       if (code === 0) {
-//         // Send the output back to the client
-//         res.send(output);
-//       } else {
-//         // Send the error back to the client
-//         res.status(500).send(output);
-//       }
-//     });
-//   });
-// app.post('/run', function(req, res) {
-//     // Get the code from the request body
-//     var code = req.body.code;
-//     console.log('Received code:', code);
-  
-//     // Create a child process to execute the code
-//     const child = spawn('g++', ['-x', 'c++', '-o', 'output', '-'], { stdio: 'pipe' });
-  
-//     // Write the code to the child process's stdin
-//     child.stdin.write(code);
-//     child.stdin.end();
-  
-//     // Handle the child process's stdout and stderr
-//     let output = '';
-//     child.stdout.on('data', (data) => {
-//       console.log(`stdout: ${data}`);
-//       output += data.toString();
-//     });
-  
-//     child.stderr.on('data', (chunk) => {
-//       if (chunk) { // Check if chunk is defined
-//         console.error(`stderr: ${chunk}`);
-//         res.write(chunk.toString());
-//       }
-//     });
-  
-//     // Handle the child process's exit
-//     child.on('exit', (code, signal) => {
-//       if (code === 0) {
-//         // Send the output back to the client
-//         res.send(output);
-//       } else {
-//         // Send the error back to the client
-//         res.status(500).send(output);
-//       }
-//     });
-//   });
+
 app.post('/run', (req, res) => {
     const code = req.body.code;
   
@@ -137,6 +63,176 @@ app.post('/run', (req, res) => {
   });
   
 
+  app.post('/run1', (req, res) => {
+    const code = req.body.code;
+  
+    // Step 1: Save the user's code to a file
+    const codeFile = 'userCode1.cpp';
+    fs.writeFileSync(codeFile, code);
+  
+    // Step 2: Compile the code
+    const compiler = spawn('g++', [codeFile, '-o', 'output1.exe']);
+    compiler.stderr.on('data', (data) => {
+      fs.unlinkSync(codeFile); // Cleanup the code file
+      res.status(500).send(data.toString());
+    });
+    compiler.on('close', (code) => {
+      if (code !== 0) {
+        fs.unlinkSync(codeFile); // Cleanup the code file
+        res.status(500).send('Compilation Error');
+        return;
+      }
+  
+      // Step 3: Execute the compiled code and capture the output
+      const runner = spawn('./output1.exe');
+      const input = fs.readFileSync('input1.txt', 'utf-8'); // Assuming input.txt exists
+  
+      // Step 4: Redirect input and output to files
+      const outputFile = 'output1.txt';
+      const errorFile = 'error1.txt';
+  
+      runner.stdin.write(input);
+      runner.stdin.end();
+  
+      let output = '';
+      runner.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+  
+      runner.stderr.on('data', (data) => {
+        fs.writeFileSync(errorFile, data.toString());
+      });
+  
+      runner.on('close', () => {
+        // Step 5: Compare output.txt and tc.txt to determine if the code passed or failed
+        const expectedOutput = fs.readFileSync('tc1.txt', 'utf-8'); // Assuming tc.txt exists
+        const isPass = output.trim() === expectedOutput.trim();
+  
+        // Step 6: Generate the output message
+        const outputMessage = isPass ? 'Pass!' : 'Fail!';
+  
+        // Cleanup temporary files
+        fs.unlinkSync(codeFile);
+        fs.writeFileSync(outputFile, output);
+  
+        res.send(outputMessage);
+      });
+    });
+  });
+
+  app.post('/run2', (req, res) => {
+    const code = req.body.code;
+  
+    // Step 1: Save the user's code to a file
+    const codeFile = 'userCode2.cpp';
+    fs.writeFileSync(codeFile, code);
+  
+    // Step 2: Compile the code
+    const compiler = spawn('g++', [codeFile, '-o', 'output2.exe']);
+    compiler.stderr.on('data', (data) => {
+      fs.unlinkSync(codeFile); // Cleanup the code file
+      res.status(500).send(data.toString());
+    });
+    compiler.on('close', (code) => {
+      if (code !== 0) {
+        fs.unlinkSync(codeFile); // Cleanup the code file
+        res.status(500).send('Compilation Error');
+        return;
+      }
+  
+      // Step 3: Execute the compiled code and capture the output
+      const runner = spawn('./output2.exe');
+      const input = fs.readFileSync('input2.txt', 'utf-8'); // Assuming input.txt exists
+  
+      // Step 4: Redirect input and output to files
+      const outputFile = 'output2.txt';
+      const errorFile = 'error2.txt';
+  
+      runner.stdin.write(input);
+      runner.stdin.end();
+  
+      let output = '';
+      runner.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+  
+      runner.stderr.on('data', (data) => {
+        fs.writeFileSync(errorFile, data.toString());
+      });
+  
+      runner.on('close', () => {
+        // Step 5: Compare output.txt and tc.txt to determine if the code passed or failed
+        const expectedOutput = fs.readFileSync('tc2.txt', 'utf-8'); // Assuming tc.txt exists
+        const isPass = output.trim() === expectedOutput.trim();
+  
+        // Step 6: Generate the output message
+        const outputMessage = isPass ? 'Pass!' : 'Fail!';
+  
+        // Cleanup temporary files
+        fs.unlinkSync(codeFile);
+        fs.writeFileSync(outputFile, output);
+  
+        res.send(outputMessage);
+      });
+    });
+  });
+
+  app.post('/run3', (req, res) => {
+    const code = req.body.code;
+  
+    // Step 1: Save the user's code to a file
+    const codeFile = 'userCode3.cpp';
+    fs.writeFileSync(codeFile, code);
+  
+    // Step 2: Compile the code
+    const compiler = spawn('g++', [codeFile, '-o', 'output3.exe']);
+    compiler.stderr.on('data', (data) => {
+      fs.unlinkSync(codeFile); // Cleanup the code file
+      res.status(500).send(data.toString());
+    });
+    compiler.on('close', (code) => {
+      if (code !== 0) {
+        fs.unlinkSync(codeFile); // Cleanup the code file
+        res.status(500).send('Compilation Error');
+        return;
+      }
+  
+      // Step 3: Execute the compiled code and capture the output
+      const runner = spawn('./output3.exe');
+      const input = fs.readFileSync('input3.txt', 'utf-8'); // Assuming input.txt exists
+  
+      // Step 4: Redirect input and output to files
+      const outputFile = 'output3.txt';
+      const errorFile = 'error3.txt';
+  
+      runner.stdin.write(input);
+      runner.stdin.end();
+  
+      let output = '';
+      runner.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+  
+      runner.stderr.on('data', (data) => {
+        fs.writeFileSync(errorFile, data.toString());
+      });
+  
+      runner.on('close', () => {
+        // Step 5: Compare output.txt and tc.txt to determine if the code passed or failed
+        const expectedOutput = fs.readFileSync('tc3.txt', 'utf-8'); // Assuming tc.txt exists
+        const isPass = output.trim() === expectedOutput.trim();
+  
+        // Step 6: Generate the output message
+        const outputMessage = isPass ? 'Pass!' : 'Fail!';
+  
+        // Cleanup temporary files
+        fs.unlinkSync(codeFile);
+        fs.writeFileSync(outputFile, output);
+  
+        res.send(outputMessage);
+      });
+    });
+  });
 app.listen(3000, () => {
     console.log("Listening on 3000")
 })
